@@ -99,7 +99,9 @@ public class SeckillServiceImpl implements SeckillService {
 		try {
 			//执行秒杀逻辑：减库存、购买记录
 			Date nowTime = new Date();
-			//减库存
+			//优化前↓↓↓
+			/*
+			 减库存
 			int updateCount = seckillDao.reduceNumber(seckillId, nowTime);
 			if(updateCount <= 0) {
 				//没有更新记录，秒杀结束
@@ -110,6 +112,25 @@ public class SeckillServiceImpl implements SeckillService {
 				if(insertCount <= 0) {
 					throw new RepeatKillException("seckill repeated.");
 				}else {
+					SuccessKilled successKilled = successKilledDao.queryByIdWithSeckill(seckillId, userPhone);
+					return new SeckillExecution(seckillId, SeckillStateEnum.SUCCESS, successKilled);
+				}
+			}
+			*/
+			//简单优化 (降低了网络延迟和GC影响的时间)
+			//记录购买行为
+			int insertCount = successKilledDao.insertSuccessKilled(seckillId, userPhone);
+			if(insertCount <= 0) {
+				//重复购买
+				throw new RepeatKillException("seckill repeated.");
+			}else {
+				//减库存，热点商品竞争
+				int updateCount = seckillDao.reduceNumber(seckillId, nowTime);
+				if(updateCount <= 0) {
+					//没有更新记录，秒杀结束，rollback
+					throw new SeckillCloseException("seckill is closed.");
+				}else {
+					//秒杀成功，commit
 					SuccessKilled successKilled = successKilledDao.queryByIdWithSeckill(seckillId, userPhone);
 					return new SeckillExecution(seckillId, SeckillStateEnum.SUCCESS, successKilled);
 				}
