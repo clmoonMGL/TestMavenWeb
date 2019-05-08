@@ -145,6 +145,13 @@
     	<version>1.0.8</version>
     </dependency>
     
+    <!-- MapUtil -->
+    <dependency>
+    	<groupId>commons-collections</groupId>
+    	<artifactId>commons-collections</artifactId>
+    	<version>3.2</version>
+    </dependency>
+    
   </dependencies>
   
   <build>
