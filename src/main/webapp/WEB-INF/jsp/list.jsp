@@ -5,7 +5,7 @@
 <html lang="zh-CN">
 <head>
 
-<title>秒杀详情页</title>
+<title>秒杀列表页</title>
 </head>
 <body>
 
